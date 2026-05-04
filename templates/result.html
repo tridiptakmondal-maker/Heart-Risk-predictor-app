@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Diagnostic Result</title>
+    <style>
+        :root { --danger: #e74c3c; --success: #27ae60; --primary: #3498db; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        .card { background: white; width: 100%; max-width: 450px; padding: 40px; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); text-align: center; box-sizing: border-box; }
+        
+        .status { font-size: 26px; font-weight: 800; text-transform: uppercase; margin-bottom: 10px; }
+        .high-risk { color: var(--danger); }
+        .low-risk { color: var(--success); }
+
+        .safety-note { color: #555; font-style: italic; margin-bottom: 30px; font-size: 0.95em; line-height: 1.4; }
+
+        .obs-box { background: #fffcf0; border: 1px solid #fcf0c0; padding: 20px; border-radius: 8px; text-align: left; margin-bottom: 30px; }
+        .obs-box strong { color: #856404; display: block; margin-bottom: 10px; font-size: 14px; }
+        .obs-box ul { margin: 0; padding-left: 20px; color: #664d03; font-size: 15px; }
+        .obs-box li { margin-bottom: 6px; }
+
+        .btn { display: inline-block; background: var(--primary); color: white; padding: 12px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; transition: 0.2s; border: none; cursor: pointer; }
+        .btn:hover { background: #2980b9; transform: translateY(-1px); }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="status {{ status_class }}">
+            {{ "High Risk Detected" if prediction == 1 else "Low Risk Detected" }}
+        </div>
+
+        <p class="safety-note">
+            {{ safety_note }}
+        </p>
+
+        {% if warnings %}
+        <div class="obs-box">
+            <strong>⚠️ Clinical Observations:</strong>
+            <ul>
+                {% for w in warnings %}
+                    <li>{{ w }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <a href="/" class="btn">New Assessment</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Health AI</title>
+    <style>
+        :root {
+            --primary: #0062E6;
+            --bg: #f8f9fa;
+            --text: #2d3436;
+            --border: #dfe6e9;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background: white;
+            width: 95%;
+            max-width: 500px;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            margin: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #636e72;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            background-color: #fff;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(0, 98, 230, 0.1);
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #0056cb;
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .disclaimer {
+            font-size: 12px;
+            color: #b2bec3;
+            text-align: center;
+            margin-top: 25px;
+            line-height: 1.4;
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Heart Risk Assessment</h2>
+    
+    <form action="/predict" method="POST">
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Age (Years)</label>
+                <input type="number" name="age" placeholder="e.g. 52" required>
+            </div>
+            <div class="form-group">
+                <label>Gender</label>
+                <select name="gender">
+                    <option value="1">Female</option>
+                    <option value="2">Male</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Height (cm)</label>
+                <input type="number" name="height" placeholder="170" required>
+            </div>
+            <div class="form-group">
+                <label>Weight (kg)</label>
+                <input type="number" name="weight" placeholder="70" required>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Systolic BP (High)</label>
+                <input type="number" name="ap_hi" placeholder="120" required>
+            </div>
+            <div class="form-group">
+                <label>Diastolic BP (Low)</label>
+                <input type="number" name="ap_lo" placeholder="80" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Cholesterol Level</label>
+            <select name="cholesterol">
+                <option value="1">Normal (< 200 mg/dL)</option>
+                <option value="2">Above Normal (200 - 239 mg/dL)</option>
+                <option value="3">Well Above Normal (≥ 240 mg/dL)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Glucose Level (Fasting)</label>
+            <select name="gluc">
+                <option value="1">Normal (< 100 mg/dL)</option>
+                <option value="2">Above Normal (100 - 125 mg/dL)</option>
+                <option value="3">Well Above Normal (≥ 126 mg/dL)</option>
+            </select>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Smoking Status</label>
+                <select name="smoke">
+                    <option value="0">Non-Smoker</option>
+                    <option value="1">Smoker</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Alcohol Intake</label>
+                <select name="alco">
+                    <option value="0">Rarely/No</option>
+                    <option value="1">Regularly</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Physical Activity</label>
+            <select name="active">
+                <option value="1">Active Lifestyle</option>
+                <option value="0">Sedentary (Inactive)</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn">Run Risk Analysis</button>
+    </form>
+
+    <div class="disclaimer">
+        Disclaimer: This tool provides a risk estimate based on statistical data and is intended for informational purposes only. It does not replace professional medical advice.
+    </div>
+</div>
+
+</body>
+</html>
