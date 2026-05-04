@@ -1,6 +1,5 @@
 import os
 import joblib
-import numpy as np
 import pandas as pd
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
@@ -9,18 +8,20 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 
-# --- Configuration ---
-app.config['SECRET_KEY'] = 'iot_club_heart_project_2026'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+# --- Absolute Path Configuration for Render ---
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'iot_club_heart_project_2026')
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'users.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 
-# --- Load the Model ---
-# Ensure heart_model.pkl is in the same directory
-model = joblib.load('heart_model.pkl')
+# --- Load the Model using Absolute Path ---
+model_path = os.path.join(basedir, 'heart_model.pkl')
+model = joblib.load(model_path)
 
 # --- Database Model ---
 class User(UserMixin, db.Model):
@@ -52,10 +53,11 @@ def register():
         try:
             db.session.add(new_user)
             db.session.commit()
-            flash('Account created! Please login.')
+            flash('Account created successfully! Please login.')
             return redirect(url_for('login'))
-        except:
-            flash('Username already exists')
+        except Exception as e:
+            db.session.rollback()
+            flash('Username already exists or database error.')
     return render_template('register.html')
 
 @app.route('/logout')
@@ -64,7 +66,7 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-# --- Main App Routes ---
+# --- Main Logic Routes ---
 
 @app.route('/')
 @login_required
@@ -75,9 +77,9 @@ def index():
 @login_required
 def predict():
     try:
-        # 1. Capture Inputs & Convert Age (Years to Days)
+        # 1. Capture Inputs & Convert Years to Days
         age_years = float(request.form.get('age'))
-        age = age_years * 365.25  # Conversion for AI model accuracy
+        age_days = age_years * 365.25
         
         gender = int(request.form.get('gender'))
         height = float(request.form.get('height'))
@@ -90,7 +92,7 @@ def predict():
         alco = int(request.form.get('alco'))
         active = int(request.form.get('active'))
 
-        # 2. Heuristic Warnings (Clinical Observations)
+        # 2. Heuristic Clinical Observations
         warnings = []
         bmi = weight / ((height / 100) ** 2)
         if bmi >= 25: warnings.append(f"High BMI ({round(bmi, 1)})")
@@ -102,20 +104,18 @@ def predict():
 
         # 3. Model Prediction
         feature_names = ['age', 'gender', 'height', 'weight', 'ap_hi', 'ap_lo', 'cholesterol', 'gluc', 'smoke', 'alco', 'active']
-        input_values = [age, gender, height, weight, ap_hi, ap_lo, chol, gluc, smoke, alco, active]
-        df_input = pd.DataFrame([input_values], columns=feature_names)
-        prediction = model.predict(df_input)[0]
+        input_data = pd.DataFrame([[age_days, gender, height, weight, ap_hi, ap_lo, chol, gluc, smoke, alco, active]], columns=feature_names)
+        prediction = model.predict(input_data)[0]
 
-        # 4. Result Formatting & Nuanced Messaging
+        # 4. Result Formatting
         status_class = "high-risk" if prediction == 1 else "low-risk"
         
         if prediction == 0 and warnings:
-            # The "Nuanced Low Risk" logic
             safety_note = "Your overall risk is low, but keep in mind the specific clinical observations listed below."
         elif prediction == 0:
-            safety_note = "Your biometric markers are within standard healthy ranges."
+            safety_note = "All measured biometric markers are within standard ranges."
         else:
-            safety_note = "High risk detected. Please consult a healthcare professional regarding the observations below."
+            safety_note = "High risk detected. Please consult a healthcare professional regarding these results."
 
         return render_template('result.html', 
                                prediction=int(prediction), 
@@ -126,7 +126,9 @@ def predict():
     except Exception as e:
         return f"System Error: {str(e)}"
 
+# --- Ensure Database Initialization ---
+with app.app_context():
+    db.create_all()
+
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-    app.run(debug=True)
+    app.run(debug=False)
