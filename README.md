@@ -1,5 +1,6 @@
 # Heart-Risk-predictor-app
 A Flask web app that uses a Machine Learning model trained on 70000 patient records to predict cardiovascular disease risk based on clinical and lifestyle factors....
 https://heart-risk-predictor-app.onrender.com
-I tried to make this app as accurate as possible but I noticed a few limitations and it is more accurate for male data.....
+
+OverviewThis app predicts heart risk using a model trained on 70,000 patient records. I built the backend in Flask to turn raw data into something actually useful for a user. The "Shift" Logic:- While testing, I found the AI was too rigid—flipping from "Low" to "High" risk over a single point. To fix this, I manually shifted the blood pressure logic in the code. By sliding the values a few units, making the results more realistic and less panicky.Real-World TweaksFixing Data Gaps: The 70k dataset has more data for men than women. To fix this "blind spot," I added extra checks in the Python logic to make sure female risk factors aren't ignored just because the AI is biased.Beyond the AI: A model alone is impractical. I use the web.py layer to double-check the AI’s work against standard medical guidelines before showing a result. Disclaimer: This is a coding project for educational use. It is not a medical tool. If you’re worried about your heart, talk to a doctor.Tech StackPython/Flask: Backend logicJoblib: Loading the trained modelPandas: Handling the input data for the AI
                                                                                   
