@@ -84,15 +84,25 @@ def predict():
         gender = int(request.form.get('gender'))
         height = float(request.form.get('height'))
         weight = float(request.form.get('weight'))
-        ap_hi = int(request.form.get('ap_hi'))
-        ap_lo = int(request.form.get('ap_lo'))
+        
+        # --- CALIBRATION LAYER: Linear Shift ---
+        bp_shift = 8  
+        
+        raw_ap_hi = int(request.form.get('ap_hi'))
+        raw_ap_lo = int(request.form.get('ap_lo'))
+        
+        # Shifted values for the AI model
+        ap_hi = raw_ap_hi - bp_shift
+        ap_lo = raw_ap_lo - bp_shift
+        # ---------------------------------------
+
         chol = int(request.form.get('cholesterol'))
         gluc = int(request.form.get('gluc'))
         smoke = int(request.form.get('smoke'))
         alco = int(request.form.get('alco'))
         active = int(request.form.get('active'))
 
-        # 2. Heuristic Clinical Observations
+        # 2. Heuristic Clinical Observations (Using RAW values for accuracy)
         warnings = []
         bmi = weight / ((height / 100) ** 2)
         if bmi >= 25: warnings.append(f"High BMI ({round(bmi, 1)})")
@@ -100,18 +110,23 @@ def predict():
         if gluc >= 2: warnings.append("Elevated Glucose")
         if smoke == 1: warnings.append("Smoking Habit")
         if active == 0: warnings.append("Sedentary Lifestyle")
-        if ap_hi >= 130 or ap_lo >= 85: warnings.append("Elevated Blood Pressure")
+        
+        # to make a well rounded prediction
+        if raw_ap_hi >= 135 or raw_ap_lo >= 84: 
+            warnings.append("Elevated Blood Pressure")
 
-        # 3. Model Prediction
+        # 3. Model Prediction (Using SHIFTED values)
         feature_names = ['age', 'gender', 'height', 'weight', 'ap_hi', 'ap_lo', 'cholesterol', 'gluc', 'smoke', 'alco', 'active']
         input_data = pd.DataFrame([[age_days, gender, height, weight, ap_hi, ap_lo, chol, gluc, smoke, alco, active]], columns=feature_names)
+        
+        # Get the prediction from the 70k-patient model
         prediction = model.predict(input_data)[0]
 
         # 4. Result Formatting
         status_class = "high-risk" if prediction == 1 else "low-risk"
         
         if prediction == 0 and warnings:
-            safety_note = "Your overall risk is low, but keep in mind the specific clinical observations listed below."
+            safety_note = "Your overall risk is low based on the model, but keep in mind the specific clinical observations listed below."
         elif prediction == 0:
             safety_note = "All measured biometric markers are within standard ranges."
         else:
